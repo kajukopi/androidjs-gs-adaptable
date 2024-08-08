@@ -6,14 +6,11 @@ const session = require("express-session")
 const logger = require("morgan")
 const methodOverride = require("method-override")
 const mongoose = require("mongoose")
-const hbs = require('hbs');
+const hbs = require("hbs")
 
-// Registering a helper to convert date-time to local date format
 hbs.registerHelper("localDate", function (dateTimeString, options) {
   const date = new Date(dateTimeString)
-  // Convert the date to a localized string format (e.g., 'YYYY-MM-DD')
-  const localDateString = date.toLocaleDateString("ID-id") // You can customize this format
-
+  const localDateString = date.toLocaleDateString("ID-id")
   return localDateString
 })
 
@@ -46,20 +43,6 @@ app.use(
 )
 
 // Routes
-app.use("/", require("./routes/home"))
-app.use("/login", require("./routes/login"))
-app.use("/register", require("./routes/register"))
-app.use("/item", require("./routes/item"))
-app.use("/user", require("./routes/user"))
-app.use("/transfer", require("./routes/transfer"))
-app.use("/service", require("./routes/service"))
-app.use("/maintenance", require("./routes/maintenance"))
-app.use("/dashboard", require("./routes/dashboard"))
-app.use("/asset", require("./routes/asset"))
-app.get("/logout", (req, res) => {
-  req.session.destroy(() => {
-    res.redirect("/login")
-  })
-})
+app.use("/", require("./routes/"))
 
 module.exports = app
