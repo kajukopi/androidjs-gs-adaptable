@@ -1,0 +1,13 @@
+.visually-hidden-title {
+    @include visually-hidden;
+}
+
+.skip-navigation {
+    @include visually-hidden-focusable;
+}
+
+.test {
+    background-color: #8a2be2;
+    background-color: #00ffff;
+    background-color: #d2691e;
+}
