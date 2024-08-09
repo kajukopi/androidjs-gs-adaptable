@@ -61,3 +61,5 @@ pids
 .next
 
 /package-lock.json
+
+/mongo-data
