@@ -6,18 +6,27 @@ const session = require("express-session")
 const logger = require("morgan")
 const methodOverride = require("method-override")
 const mongoose = require("mongoose")
+const MongoStore = require("connect-mongo")
 const hbs = require("hbs")
 
-hbs.registerHelper("localDate", function (dateTimeString, options) {
-  const date = new Date(dateTimeString)
-  const localDateString = date.toLocaleDateString("ID-id")
-  return localDateString
+hbs.registerHelper("uppercase", function (text, options) {
+  return text.toUpperCase()
 })
+
+hbs.registerHelper("lowercase", function (text, options) {
+  return text.toLowerCase()
+})
+
+hbs.registerHelper("localDate", function (date, options) {
+  return new Date(date).toLocaleDateString("id-ID")
+})
+
+hbs.registerPartials(path.join(__dirname, "views/partials"))
 
 mongoose
   .connect(process.env.DATABASE_URL)
   .then(() => {
-    console.log("Connected to mongodb!")
+    console.log("Connected!")
   })
   .catch((error) => {
     console.log(error)
@@ -36,14 +45,28 @@ app.use("/assets", express.static(path.join(__dirname, "..", "/assets")))
 
 app.use(
   session({
-    secret: "karimroy",
+    secret: process.env.SESSION_SECRET,
     resave: false,
     saveUninitialized: false,
-    cookie: {maxAge: 60 * 60000},
+    store: MongoStore.create({mongoUrl: process.env.DATABASE_URL}),
+    cookie: {maxAge: 1000 * 60 * 60 * 24}, // 1 day
   })
 )
 
 // Routes
-app.use("/", require("./routes/"))
+const {authRouter, isAuthenticated, authorizeRole} = require("./routes/auth")
+const clientRoutes = require("./routes/clients")
+const assetRoutes = require("./routes/assets")
+const roomRoutes = require("./routes/rooms")
+const serviceRoutes = require("./routes/services")
+const staffRoutes = require("./routes/staff")
+
+// Protecting routes
+app.use("/clients", isAuthenticated, clientRoutes)
+app.use("/assets", isAuthenticated, assetRoutes)
+app.use("/rooms", isAuthenticated, roomRoutes)
+app.use("/services", isAuthenticated, serviceRoutes)
+app.use("/staff", isAuthenticated, authorizeRole("admin"), staffRoutes)
+app.use("/auth", authRouter)
 
 module.exports = app
